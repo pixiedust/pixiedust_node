@@ -19,7 +19,6 @@ class NodeStdReader(Thread):
         self.ps = ps
         self.daemon = True
         self.start()
-        
 
     def run(self):
         

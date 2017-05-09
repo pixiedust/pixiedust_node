@@ -19,6 +19,7 @@ import warnings
 from .node import Node
 from .npm import Npm
 import os
+from pixiedust.utils.shellAccess import ShellAccess
 
 # pixiedust magics to interpret cells starting with %%node
 @magics_class
@@ -27,16 +28,15 @@ class PixiedustNodeMagics(Magics):
     def __init__(self, shell):
         super(PixiedustNodeMagics,self).__init__(shell=shell) 
         # create Node.js sub-process
+        print "pixiedust_node https://github.com/ibm-cds-labs/pixiedust_node"
         path = os.path.join(__path__[0], 'pixiedustNodeRepl.js')
         self.n = Node(path)
+        ShellAccess.npm = Npm()
 
     @cell_magic
     def node(self, line, cell):
         # write the cell contents to the Node.js process
         self.n.write(cell)
-
-    def npm(self, module):
-        n = Npm(module)
 
     def cancel(self):
         self.n.write("\r\n.break\r\n")

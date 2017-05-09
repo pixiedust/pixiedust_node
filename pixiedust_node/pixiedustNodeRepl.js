@@ -46,7 +46,13 @@ const startRepl = function(instream, outstream) {
 };
 
 startRepl(process.stdin, process.stdout);
-console.log("Pixiedust Node started");
-console.log("* print - print out values");
-console.log("* display - turn into Pandas dataframe and display with Pixiedust");
-console.log("* store - turn into Pandas dataframe and assign to Python variable");
+console.log("pixiedust_node started");
+console.log("JavaScript functions:")
+console.log("* print(x) - print out x");
+console.log("* display(x) - turn x into Pandas dataframe and display with Pixiedust");
+console.log("* store(x,y) - turn x into Pandas dataframe and assign to Python variable y");
+console.log("Python helpers:")
+console.log("* npm.install(x) - install npm package x")
+console.log("* npm.remove(x) - remove npm package x")
+console.log("* npm.list() - list installed npm packages")
+

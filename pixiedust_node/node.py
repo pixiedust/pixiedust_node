@@ -14,7 +14,7 @@ class Node:
 
         # create sub-process
         self.ps = subprocess.Popen( ('node', path), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print("Node process id", self.ps.pid)
+        #print ("Node process id", self.ps.pid)
 
         # create thread to read this process's output          
         t = NodeStdReader(self.ps)

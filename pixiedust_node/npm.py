@@ -1,17 +1,28 @@
 
 import subprocess
-from .nodestdreader import NodeStdReader
 
-# runs a Node sub-process and starts a NodeStdReader thread
-# to listen to its stdout.
+# npm helper
+# allows npm modules to be installed, removed and listed
 class Npm:
 
-    # run a JavaScript script (path) with "node"
-    def __init__(self, module):
-
+    # run an npm command
+    def cmd(self, command, module):
         # create sub-process
-        self.ps = subprocess.Popen( ('npm', module), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print("npm process id", self.ps.pid)
+        args = ['npm', command, '-s']
+        if (module):
+            if (isinstance(module, str)):
+                args.append(module)
+            else:
+                args.extend(module)
+        print ' '.join(args)
+        output = subprocess.check_output(args)
+        print output
 
-        # create thread to read this process's output          
-        t = NodeStdReader(self.ps)
+    def install(self, module):
+        self.cmd('install', module)
+
+    def remove(self, module):
+        self.cmd('remove', module)
+
+    def list(self):
+        self.cmd('list', None)

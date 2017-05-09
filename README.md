@@ -33,10 +33,18 @@ Use the `%%node` prefix in a notebook cell to indicate that the content that fol
 print(new Date());
 ```
 
-or you can install any [npm](https://www.npmjs.com/) module to use in your Node.js code. To install npm modules:
+## Installing npm modules
 
-```py
-!npm install -s request request-promise silverlining
+You can install any [npm](https://www.npmjs.com/) module to use in your Node.js code from your notebook. To install npm modules, in a Python cell:
+
+```python
+npm.install('silverlining')
+```
+
+or install multiple libraries in one go:
+
+```python
+npm.install( ('request', 'request-promise') )
 ```
 
 and then "require" the modules in your Node.js code.
@@ -44,6 +52,7 @@ and then "require" the modules in your Node.js code.
 ```js
 %%node
 var silverlining = require('silverlining');
+var request = require('request-promise');
 ```
 
 ## Display/print/store
