@@ -34,7 +34,7 @@ class PixiedustNodeMagics(Magics):
             <a href="https://github.com/ibm-cds-labs/pixiedust_node" target="_new"> 
             <img src="https://github.com/ibm-cds-labs/pixiedust_node/raw/master/docs/_images/pdn_icon32.png" style="float:left;margin-right:10px"/> 
             </a> 
-            <span>pixiedust_node</span> 
+            <span>Pixiedust Node.js</span> 
             </div> 
 """
         ))
