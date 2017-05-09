@@ -101,3 +101,18 @@ The dataframe 'x' is now available to use in a Python cell:
 x['population'].sum()
 ```
 
+## Managing the Node.js process
+
+If enter some invalid syntax into a `%%node` cell, such as code with more opening brackets than closing brackes, then the Node.js interpreter may not think you have finished typing and you receive no output.
+
+You can cancel execution by running the following command in a Python cell:
+
+```python
+node.cancel()
+```
+
+If you need to clear your Node.js variables and restart from the beginning then issue the following command in an Python cell:
+
+```python
+node.clear()
+```

@@ -22,3 +22,9 @@ class Node:
     def write(self, s):
         self.ps.stdin.write(s)
         self.ps.stdin.write("\r\n")
+
+    def cancel(self):
+        self.write("\r\n.break")
+
+    def clear(self):
+        self.write("\r\n.clear")

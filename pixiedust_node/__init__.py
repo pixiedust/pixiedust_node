@@ -32,17 +32,12 @@ class PixiedustNodeMagics(Magics):
         path = os.path.join(__path__[0], 'pixiedustNodeRepl.js')
         self.n = Node(path)
         ShellAccess.npm = Npm()
+        ShellAccess.node = self.n
 
     @cell_magic
     def node(self, line, cell):
         # write the cell contents to the Node.js process
         self.n.write(cell)
-
-    def cancel(self):
-        self.n.write("\r\n.break\r\n")
-
-    def clear(self):
-        self.n.write("\r\n.clear\r\n")
  
 try:
     with warnings.catch_warnings():

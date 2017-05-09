@@ -37,11 +37,18 @@ const startRepl = function(instream, outstream) {
   };
 
   // add silverlining library and print/display
-  r.context.silverlining = require('silverlining');
-  r.context.request = require('request-promise-native');
-  r.context.print = print;
-  r.context.display = display;
-  r.context.store = store;
+  var resetContext = function() {
+    r.context.print = print;
+    r.context.display = display;
+    r.context.store = store;
+  };
+
+  // add print/disply/store back in on reset
+  r.on('reset', resetContext);
+
+  // reset the context
+  resetContext();
+
   return r;
 };
 
@@ -50,7 +57,7 @@ console.log("pixiedust_node started");
 console.log("JavaScript functions:")
 console.log("* print(x) - print out x");
 console.log("* display(x) - turn x into Pandas dataframe and display with Pixiedust");
-console.log("* store(x,y) - turn x into Pandas dataframe and assign to Python variable y");
+console.log("* store(x,'y') - turn x into Pandas dataframe and assign to Python variable y");
 console.log("Python helpers:")
 console.log("* npm.install(x) - install npm package x")
 console.log("* npm.remove(x) - remove npm package x")
