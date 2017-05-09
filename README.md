@@ -116,3 +116,18 @@ If you need to clear your Node.js variables and restart from the beginning then 
 ```python
 node.clear()
 ```
+
+## Help
+
+You can view the help either in Python:
+
+```python
+node.help()
+```
+
+or in a Node.js cell:
+
+```js
+%%node
+help();
+```

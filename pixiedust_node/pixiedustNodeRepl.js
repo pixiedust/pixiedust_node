@@ -1,4 +1,5 @@
 const repl = require('repl');
+const pkg = require('./package.json');
 
 // custom writer function that outputs nothing
 const writer = function(output) {
@@ -36,11 +37,31 @@ const startRepl = function(instream, outstream) {
     outstream.write(JSON.stringify(obj) + '\n')
   };
 
+  const help = function() {
+    console.log(pkg.name, pkg.version);
+    console.log(pkg.repository.url);
+    console.log();
+    console.log("JavaScript functions:");
+    console.log("* print(x) - print out x");
+    console.log("* display(x) - turn x into Pandas dataframe and display with Pixiedust");
+    console.log("* store(x,'y') - turn x into Pandas dataframe and assign to Python variable y");
+    console.log("* help() - display help");
+    console.log();
+    console.log("Python helpers:");
+    console.log("* npm.install(x) - install npm package x");
+    console.log("* npm.remove(x) - remove npm package x");
+    console.log("* npm.list() - list installed npm packages");
+    console.log("* node.cancel() - cancel Node.js execution");
+    console.log("* node.clear() - clear and reset the Node.js engine");
+    console.log("* node.help() - view help")
+  };
+
   // add silverlining library and print/display
   var resetContext = function() {
     r.context.print = print;
     r.context.display = display;
     r.context.store = store;
+    r.context.help = help;
   };
 
   // add print/disply/store back in on reset
@@ -53,13 +74,4 @@ const startRepl = function(instream, outstream) {
 };
 
 startRepl(process.stdin, process.stdout);
-console.log("pixiedust_node started");
-console.log("JavaScript functions:")
-console.log("* print(x) - print out x");
-console.log("* display(x) - turn x into Pandas dataframe and display with Pixiedust");
-console.log("* store(x,'y') - turn x into Pandas dataframe and assign to Python variable y");
-console.log("Python helpers:")
-console.log("* npm.install(x) - install npm package x")
-console.log("* npm.remove(x) - remove npm package x")
-console.log("* npm.list() - list installed npm packages")
-
+console.log(pkg.name, pkg.version, "started. Cells starting '%%node' may contain Node.js code.");

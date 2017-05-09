@@ -28,3 +28,7 @@ class Node:
 
     def clear(self):
         self.write("\r\n.clear")
+
+    def help(self):
+        self.cancel()
+        self.write("help()\r\n")

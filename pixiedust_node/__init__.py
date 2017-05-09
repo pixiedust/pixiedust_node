@@ -15,6 +15,7 @@
 # -------------------------------------------------------------------------------
 
 from IPython.core.magic import (Magics, magics_class, cell_magic)
+from IPython.display import display, HTML
 import warnings
 from .node import Node
 from .npm import Npm
@@ -27,8 +28,17 @@ class PixiedustNodeMagics(Magics):
 
     def __init__(self, shell):
         super(PixiedustNodeMagics,self).__init__(shell=shell) 
+        display(HTML(
+"""
+            <div style="margin:10px"> 
+            <a href="https://github.com/ibm-cds-labs/pixiedust_node" target="_new"> 
+            <img src="https://github.com/ibm-cds-labs/pixiedust_node/raw/master/docs/_images/pdn_icon32.png" style="float:left;margin-right:10px"/> 
+            </a> 
+            <span>pixiedust_node</span> 
+            </div> 
+"""
+        ))
         # create Node.js sub-process
-        print "pixiedust_node https://github.com/ibm-cds-labs/pixiedust_node"
         path = os.path.join(__path__[0], 'pixiedustNodeRepl.js')
         self.n = Node(path)
         ShellAccess.npm = Npm()
