@@ -1,7 +1,7 @@
 from pixiedust.display import *
 from pixiedust.utils.shellAccess import ShellAccess
 from threading import Thread
-from IPython.display import display, HTML
+import IPython
 import json
 import pandas
 
@@ -55,9 +55,9 @@ class NodeStdReader(Thread):
                             variable = obj['variable']
                         ShellAccess[variable] = pandas.DataFrame(obj['data'])
                     elif obj['type'] == 'html':
-                        display(HTML(obj['data']))
+                        IPython.display.display(IPython.display.HTML(obj['data']))
                     elif obj['type'] == 'image':
-                        display(HTML('<img src="{0}" />'.format(obj['data'])))
+                        IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
   
             except Exception as e:
                 print(line)
