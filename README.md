@@ -55,13 +55,21 @@ var silverlining = require('silverlining');
 var request = require('request-promise');
 ```
 
-## Display/print/store
+You may also do :
 
-There are three functions that can be used in JavaScript to interact with the Notebook
+- `npm.remove('packagename')` - to remove an npm module
+- `npm.list()` - to list the installed modules
 
-- print - print out a variable
-- display - use Pixiedust's display function to visualise a JavaScript object
-- store - turn a JavaScript array into a Pandas data frame
+## Node.js helper functions
+
+Node.js functions are available to interact with the Notebook
+
+- `print(x)` - print out the value of variable x 
+- `display(x)` - use Pixiedust's `display` function to visualise an array of data
+- `store(x,'y')` - turn a JavaScript array x into a Pandas data frame and store in Python variable y
+- `html(x)` - render HTML string x in a notebook cell
+- `image(x)` - render image URL x in a notebook cell
+- `help()` - show help
 
 ### print
 
@@ -101,6 +109,29 @@ The dataframe 'x' is now available to use in a Python cell:
 x['population'].sum()
 ```
 
+### html
+
+```js
+%%node
+var str = 'Sales are up <b>25%</b>';
+html(str);
+```
+
+### js
+
+```js
+%%node
+var url = 'http://myserver.com/path/to/image.jpg';
+image(url);
+```
+
+### help
+
+```js
+%%node
+help();
+```
+
 ## Managing the Node.js process
 
 If enter some invalid syntax into a `%%node` cell, such as code with more opening brackets than closing brackes, then the Node.js interpreter may not think you have finished typing and you receive no output.
@@ -119,15 +150,8 @@ node.clear()
 
 ## Help
 
-You can view the help either in Python:
+You can view the help in a Python cell:
 
 ```python
 node.help()
-```
-
-or in a Node.js cell:
-
-```js
-%%node
-help();
 ```
