@@ -2,6 +2,13 @@
 
 PixieDust extension that enable a Jupyter Notebook user to invoke Node.js commands.
 
+![schematic](images/pixiedust_node_schematic.png)
+
+
+## How it works
+
+The `pixiedust_node` Python module has access to Pixiedust's *display* API to render charts and maps. When `pixiedust_node` is imported into a notebook, a Node.js sub-process is setup and the notebook is configured so that cells beginning with '%%node' may contain JavaScript code: that code is piped to the Node.js sub-process automatically. The output of the Node.js process is parsed by `pixiedust_node` to handle the use of functions display/print/store/html/image. The `pixiedust_node` module also allows npm installs to be initiated from within the notebook. This achieved with further npm sub-processes whose output appears in the notebook. 
+
 ## Prerequisites
 
 To use `pixiedust_node` you need to be running a Jupyter notebooks with the [Pixedust](https://github.com/ibm-cds-labs/pixiedust) extension installed. Notebooks can be run in the cloud using the [Data Science Experience](http://datascience.ibm.com/) or locally by [installing Pixiedust and its prerequisites](https://ibm-cds-labs.github.io/pixiedust/install.html).
