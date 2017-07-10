@@ -90,4 +90,6 @@ ENV/
 
 .DS_Store
 
+start.sh
+
 pixiedust_node/node_modules

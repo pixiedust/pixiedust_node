@@ -11,7 +11,8 @@ The `pixiedust_node` Python module has access to Pixiedust's *display* API to re
 
 ## Prerequisites
 
-To use `pixiedust_node` you need to be running a Jupyter notebooks with the [Pixedust](https://github.com/ibm-cds-labs/pixiedust) extension installed. Notebooks can be run in the cloud using the [Data Science Experience](http://datascience.ibm.com/) or locally by [installing Pixiedust and its prerequisites](https://ibm-cds-labs.github.io/pixiedust/install.html).
+To use `pixiedust_node` you need to be running a Jupyter notebooks with the [Pixedust](https://github.com/ibm-cds-labs/pixiedust) extension installed. Notebooks can be run locally by [installing Pixiedust and its prerequisites](https://ibm-cds-labs.github.io/pixiedust/install.html).
+
 
 You also need Node.js/npm installed. See the [Node.js downloads](https://nodejs.org/en/download/) page to find an installer for your platform.
 
@@ -20,7 +21,7 @@ You also need Node.js/npm installed. See the [Node.js downloads](https://nodejs.
 Inside your Jupyter notebook, install *pixiedust_node*  with
 
 ```python
-!pip install -e /path/to/pixiedust_node
+!pip install pixiedust_node
 ```
 
 ## Running

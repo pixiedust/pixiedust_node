@@ -1,7 +1,7 @@
 {
   "name": "pixiedust_node",
-  "version": "0.0.0",
-  "description": "PixieDust Node Magic",
+  "version": "0.1.0",
+  "description": "Run Node.js cells in Jupyter notebooks with Pixiedust",
   "main": "pixiedustNodeRepl.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
