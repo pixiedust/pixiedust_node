@@ -10,8 +10,13 @@ class Npm:
 
     # run an npm command
     def cmd(self, command, module):
-        # create sub-process
+        # create node_modules
         home = Environment.pixiedustHome
+        node_modules = os.path.join(home,'node_modules')
+        if not os.path.exists(node_modules):
+            os.makedirs(node_modules)
+
+        # create sub-process
         npm_path = self.which('npm')
         args = [npm_path, command, '-s']
         if (module):
