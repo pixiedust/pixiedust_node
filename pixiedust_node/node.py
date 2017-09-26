@@ -2,6 +2,7 @@
 import subprocess
 import os
 from .nodestdreader import NodeStdReader
+from pixiedust.utils.environment import Environment
 
 # runs a Node sub-process and starts a NodeStdReader thread
 # to listen to its stdout.
@@ -13,11 +14,10 @@ class Node:
     # run a JavaScript script (path) with "node"
     def __init__(self, path):
         # get the home directory
-        node = 'node';
-        home = get_ipython().home_dir
+        home = Environment.pixiedustHome
 
         # check that node exists
-        node_path = self.which(node)
+        node_path = self.which('node')
 
         if node_path == None:
             print 'ERROR: Cannot find Node.js executable'

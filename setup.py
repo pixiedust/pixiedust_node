@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='pixiedust_node',
-      version='0.1.2',
+      version='0.1.3',
       description='Pixiedust extension for Node.js',
       url='https://github.com/ibm-watson-data-lab/pixiedust_node',
       install_requires=['pixiedust'],
