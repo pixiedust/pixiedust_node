@@ -12,7 +12,8 @@ class Npm:
     def cmd(self, command, module):
         # create node_modules
         home = Environment.pixiedustHome
-        node_modules = os.path.join(home,'node_modules')
+        node_home = os.path.join(home,'node')
+        node_modules = os.path.join(node_home,'node_modules')
         if not os.path.exists(node_modules):
             os.makedirs(node_modules)
 
@@ -25,7 +26,7 @@ class Npm:
             else:
                 args.extend(module)
         print ' '.join(args)
-        ps = subprocess.Popen( args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd = home)
+        ps = subprocess.Popen( args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd = node_home)
         
         # create thread to read this process's output          
         t = NodeStdReader(ps)

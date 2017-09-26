@@ -15,6 +15,9 @@ class Node:
     def __init__(self, path):
         # get the home directory
         home = Environment.pixiedustHome
+        node_home = os.path.join(home,'node')
+        if not os.path.exists(node_home):
+            os.makedirs(node_home)
 
         # check that node exists
         node_path = self.which('node')
@@ -24,7 +27,7 @@ class Node:
             raise FileNotFoundError('node executable not found in path')
         else:
             # create sub-process
-            self.ps = subprocess.Popen( (node_path, path), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd = home)
+            self.ps = subprocess.Popen( (node_path, path), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd = node_home)
             # print ("Node process id", self.ps.pid)
 
             # create thread to read this process's output          
