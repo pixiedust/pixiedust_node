@@ -1,6 +1,6 @@
 {
   "name": "pixiedust_node",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Run Node.js cells in Jupyter notebooks with Pixiedust",
   "main": "pixiedustNodeRepl.js",
   "scripts": {
