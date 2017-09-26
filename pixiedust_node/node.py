@@ -23,7 +23,7 @@ class Node:
         node_path = self.which('node')
 
         if node_path == None:
-            print 'ERROR: Cannot find Node.js executable'
+            print ('ERROR: Cannot find Node.js executable')
             raise FileNotFoundError('node executable not found in path')
         else:
             # create sub-process
