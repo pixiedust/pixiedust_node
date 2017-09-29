@@ -25,7 +25,7 @@ class Npm:
                 args.append(module)
             else:
                 args.extend(module)
-        print ' '.join(args)
+        print (' '.join(args))
         ps = subprocess.Popen( args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd = node_home)
         
         # create thread to read this process's output          
