@@ -36,7 +36,10 @@ class Npm:
         self.cmd('install', module)
 
     def remove(self, module):
-        self.cmd('remove', module)
+        self.cmd('uninstall', module)
+
+    def uninstall(self, module):
+        self.cmd('uninstall', module)
 
     def list(self):
         self.cmd('list', None)

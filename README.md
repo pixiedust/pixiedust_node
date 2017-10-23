@@ -65,7 +65,7 @@ var request = require('request-promise');
 
 You may also do :
 
-- `npm.remove('packagename')` - to remove an npm module
+- `npm.uninstall('packagename')` - to remove an npm module (or `npm.remove('packagename')`)
 - `npm.list()` - to list the installed modules
 
 ## Node.js helper functions

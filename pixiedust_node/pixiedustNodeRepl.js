@@ -65,7 +65,7 @@ const startRepl = function(instream, outstream) {
     console.log();
     console.log("Python helpers:");
     console.log("* npm.install(x) - install npm package x");
-    console.log("* npm.remove(x) - remove npm package x");
+    console.log("* npm.uninstall(x) - remove npm package x");
     console.log("* npm.list() - list installed npm packages");
     console.log("* node.cancel() - cancel Node.js execution");
     console.log("* node.clear() - clear and reset the Node.js engine");
