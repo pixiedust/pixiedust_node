@@ -17,8 +17,7 @@
 from IPython.core.magic import (Magics, magics_class, cell_magic)
 from IPython.display import display, HTML
 import warnings
-from .node import Node
-from .npm import Npm
+from .node import Node, Npm
 import os
 from pixiedust.utils.shellAccess import ShellAccess
 
@@ -48,11 +47,12 @@ class PixiedustNodeMagics(Magics):
     def node(self, line, cell):
         # write the cell contents to the Node.js process
         self.n.write(cell)
- 
+
+
 try:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         get_ipython().register_magics(PixiedustNodeMagics)
 except NameError:
-    #IPython not available we must be in a spark executor\
+    # IPython not available we must be in a spark executor\
     pass
