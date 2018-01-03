@@ -30,7 +30,12 @@ class Npm:
         
         # create thread to read this process's output          
         t = NodeStdReader(ps)
+
+        # wait for the sub-process to exit
         ps.wait()
+
+        # tell the thread reading its output to stop too, to prevent 100% CPU usage
+        t.stop()
 
     def install(self, module):
         self.cmd('install', module)

@@ -1,6 +1,7 @@
 from pixiedust.display import *
 from pixiedust.utils.shellAccess import ShellAccess
 from threading import Thread
+from threading import Event
 import IPython
 import json
 import pandas
@@ -17,14 +18,18 @@ class NodeStdReader(Thread):
 
     def __init__(self, ps):
         super(NodeStdReader, self).__init__() 
+        self._stop_event = Event()
         self.ps = ps
         self.daemon = True
         self.start()
 
+    def stop(self):
+        self._stop_event.set()
+
     def run(self):
-        
+
         # forever
-        while(True):
+        while(self._stop_event.is_set() == False):
             # read line from Node's stdout
             line = self.ps.stdout.readline()
 
