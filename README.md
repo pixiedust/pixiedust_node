@@ -102,6 +102,8 @@ cities.query({name: 'York'}).then(display);
 
 ### store
 
+** This function is deprecated as Node.js global variables are copied to the Python environment automatically **
+
 ```js
 %%node
 
@@ -125,7 +127,7 @@ var str = 'Sales are up <b>25%</b>';
 html(str);
 ```
 
-### js
+### image
 
 ```js
 %%node
@@ -139,6 +141,32 @@ image(url);
 %%node
 help();
 ```
+
+## Node.js-Python bridge
+
+Any *global* variables that you create in your `%%node` cells will be automatically copied to equivalent variables in Python. e.g if you create some variables in a Node.js cell:
+
+```
+%%node
+var str = "hello world";
+var n1 = 4.1515;
+var n2 = 42;
+var tf = true;
+var obj = { name:"Frank", age: 42 };
+var array_of_strings = ["hello", "world"];
+var array_of_objects = [{a:1,b:2}, {a:3, b:4}];
+```
+
+Then these variables can be used in Python:
+
+```
+print str, n1, n2, tf
+print obj
+print array_of_strings
+print array_of_objects
+```
+
+Strings, numbers, booleans and arrays of such are converted to their equivalent in Python. Objects are converted into Python dictionaries and arrays of objects are automatically converted into a Pandas DataFrames.
 
 ## Managing the Node.js process
 

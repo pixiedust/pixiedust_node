@@ -114,6 +114,7 @@ const startRepl = function(instream, outstream) {
     r.context.html = html;
     r.context.image = image;
     r.context.help = help;
+    lastGlobal = {};
   };
 
   // add print/disply/store back in on reset
