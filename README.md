@@ -168,6 +168,8 @@ print array_of_objects
 
 Strings, numbers, booleans and arrays of such are converted to their equivalent in Python. Objects are converted into Python dictionaries and arrays of objects are automatically converted into a Pandas DataFrames.
 
+Note that only variables declared with `var` are moved to Python, not constants declared with `const`.
+
 ## Managing the Node.js process
 
 If enter some invalid syntax into a `%%node` cell, such as code with more opening brackets than closing brackes, then the Node.js interpreter may not think you have finished typing and you receive no output.
