@@ -60,6 +60,7 @@ class NodeStdReader(Thread):
                     elif obj['type'] == 'print':
                         print(json.dumps(obj['data']))
                     elif obj['type'] == 'store':
+                        print '!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!'
                         variable = 'pdf'
                         if 'variable' in obj:
                             variable = obj['variable']
@@ -68,6 +69,12 @@ class NodeStdReader(Thread):
                         IPython.display.display(IPython.display.HTML(obj['data']))
                     elif obj['type'] == 'image':
                         IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
+                    elif obj['type'] == 'variable':
+                        if obj['datatype'] == 'array' :
+                            ShellAccess[obj['key']] = pandas.DataFrame(obj['value'])
+                        else:
+                            ShellAccess[obj['key']] = obj['value']
+
 
             except Exception as e:
                 print(line)

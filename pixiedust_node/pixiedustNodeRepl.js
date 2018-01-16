@@ -1,5 +1,6 @@
 const repl = require('repl');
 const pkg = require('./package.json');
+const crypto = require('crypto');
 
 // custom writer function that outputs nothing
 const writer = function(output) {
@@ -15,6 +16,39 @@ const startRepl = function(instream, outstream) {
     writer: writer
   };
   const r = repl.start(options);
+  var lastGlobal = {};
+  var interval = null;
+
+  // generate hash from data
+  const hash = function(data) {
+    return crypto.createHash('md5').update(data).digest("hex");
+  }
+
+  const isArray = Array.isArray || function(obj) {
+    return obj && toString.call(obj) === '[object Array]';
+  };
+
+  const globalVariableChecker = function() {
+     var varlist = Object.getOwnPropertyNames(r.context);
+     //console.log(varlist);
+     const cutoff = varlist.indexOf('help') + 1;
+     varlist.splice(0, cutoff);
+     //console.log(varlist);
+     if (varlist.length === 0) return;
+     for(var i in varlist) {
+       const v = varlist[i];
+       const h =  hash(JSON.stringify(r.context[v]));
+       if (lastGlobal[v] !== h) {
+         const datatype = isArray(r.context[v]) && typeof r.context[v][0] === 'object' ? 'array' : typeof r.context[v];
+         const obj = { _pixiedust: true, type: 'variable', key: v, datatype: datatype, value: r.context[v] };
+         outstream.write(JSON.stringify(obj) + '\n')
+         lastGlobal[v] = h;
+       }
+     }
+  };
+
+  // sync Node.js to Python every 1 second
+  interval = setInterval(globalVariableChecker, 1000);
 
   // custom print function for Notebook interface
   const print = function(data) {
