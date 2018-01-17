@@ -2,13 +2,38 @@ const repl = require('repl');
 const pkg = require('./package.json');
 const crypto = require('crypto');
 
-// custom writer function that outputs nothing
-const writer = function(output) {
-  // don't output anything
-  return '';
-};
+
 
 const startRepl = function(instream, outstream) {
+
+  // check for Node.js global variables and move those values to Python
+  const globalVariableChecker = function() {
+    var varlist = Object.getOwnPropertyNames(r.context);
+    const cutoff = varlist.indexOf('help') + 1;
+    varlist.splice(0, cutoff);
+    if (varlist.length === 0) return;
+    for(var i in varlist) {
+      const v = varlist[i];
+      const h =  hash(JSON.stringify(r.context[v]));
+      if (lastGlobal[v] !== h) {
+        const datatype = isArray(r.context[v]) && typeof r.context[v][0] === 'object' ? 'array' : typeof r.context[v];
+        const obj = { _pixiedust: true, type: 'variable', key: v, datatype: datatype, value: r.context[v] };
+        outstream.write(JSON.stringify(obj) + '\n')
+        lastGlobal[v] = h;
+      }
+    }
+  };
+
+  // sync Node.js to Python every 1 second
+  interval = setInterval(globalVariableChecker, 1000);
+
+  // custom writer function that outputs nothing
+  const writer = function(output) {
+    globalVariableChecker();
+    // don't output anything
+    return '';
+  };
+
   const options = {
     input: instream,
     output: outstream,
@@ -28,61 +53,46 @@ const startRepl = function(instream, outstream) {
     return obj && toString.call(obj) === '[object Array]';
   };
 
-  const globalVariableChecker = function() {
-     var varlist = Object.getOwnPropertyNames(r.context);
-     //console.log(varlist);
-     const cutoff = varlist.indexOf('help') + 1;
-     varlist.splice(0, cutoff);
-     //console.log(varlist);
-     if (varlist.length === 0) return;
-     for(var i in varlist) {
-       const v = varlist[i];
-       const h =  hash(JSON.stringify(r.context[v]));
-       if (lastGlobal[v] !== h) {
-         const datatype = isArray(r.context[v]) && typeof r.context[v][0] === 'object' ? 'array' : typeof r.context[v];
-         const obj = { _pixiedust: true, type: 'variable', key: v, datatype: datatype, value: r.context[v] };
-         outstream.write(JSON.stringify(obj) + '\n')
-         lastGlobal[v] = h;
-       }
-     }
-  };
-
-  // sync Node.js to Python every 1 second
-  interval = setInterval(globalVariableChecker, 1000);
-
   // custom print function for Notebook interface
   const print = function(data) {
     // bundle the data into an object
     const obj = { _pixiedust: true, type: 'print', data: data };
-    outstream.write(JSON.stringify(obj) + '\n')
+    outstream.write(JSON.stringify(obj) + '\n');
+    globalVariableChecker();
   };
 
   // custom display function for Notebook interface
   const display = function(data) {
     // bundle the data into an object
     const obj = { _pixiedust: true, type: 'display', data: data };
-    outstream.write(JSON.stringify(obj) + '\n')
+    outstream.write(JSON.stringify(obj) + '\n');
+    globalVariableChecker();
   };
 
   // custom display function for Notebook interface
   const store = function(data, variable) {
+    globalVariableChecker();
+    if (!data && !variable) return;
     // bundle the data into an object
     const obj = { _pixiedust: true, type: 'store', data: data, variable: variable };
-    outstream.write(JSON.stringify(obj) + '\n')
+    outstream.write(JSON.stringify(obj) + '\n');
+   
   };
 
   // display html in Notebook cell
   const html = function(data) {
     // bundle the data into an object
     const obj = { _pixiedust: true, type: 'html', data: data};
-    outstream.write(JSON.stringify(obj) + '\n')
+    outstream.write(JSON.stringify(obj) + '\n');
+    globalVariableChecker();
   };
 
   // display image in Notebook cell
   const image = function(data) {
     // bundle the data into an object
     const obj = { _pixiedust: true, type: 'image', data: data};
-    outstream.write(JSON.stringify(obj) + '\n')
+    outstream.write(JSON.stringify(obj) + '\n');
+    globalVariableChecker();
   };
 
   const help = function() {
@@ -92,7 +102,6 @@ const startRepl = function(instream, outstream) {
     console.log("JavaScript functions:");
     console.log("* print(x) - print out x");
     console.log("* display(x) - turn x into Pandas dataframe and display with Pixiedust");
-    console.log("* store(x,'y') - turn x into Pandas dataframe and assign to Python variable y");
     console.log("* html(x) - display HTML x in Notebook cell");
     console.log("* image(x) - display image URL x in a Notebook cell");
     console.log("* help() - display help");

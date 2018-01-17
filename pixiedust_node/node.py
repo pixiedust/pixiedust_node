@@ -13,6 +13,18 @@ from pixiedust.display import display
 from pixiedust.utils.environment import Environment
 from pixiedust.utils.shellAccess import ShellAccess
 
+class VarWatcher(object):
+    def __init__(self, ip, ps):
+        self.shell = ip
+        self.ps = ps
+        ip.events.register('post_execute', self.post_execute)
+
+    def post_execute(self):
+        for key in self.shell.user_ns:
+            t = type(self.shell.user_ns[key])
+            if not key.startswith('_') and (t == str or t == int):
+                #print("Setting JS variable: " + key + " from Python")
+                self.ps.stdin.write("var " + key + " = " + json.dumps(self.shell.user_ns[key]) + ";\r\n")
 
 class NodeStdReader(Thread):
     """
@@ -34,6 +46,7 @@ class NodeStdReader(Thread):
         self._stop_event.set()
 
     def run(self):
+
         # forever
         while not self._stop_event.is_set():
             # read line from Node's stdout
@@ -70,11 +83,8 @@ class NodeStdReader(Thread):
                     elif obj['type'] == 'image':
                         IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
                     elif obj['type'] == 'variable':
-                        if obj['datatype'] == 'array' :
-                            ShellAccess[obj['key']] = pandas.DataFrame(obj['value'])
-                        else:
-                            ShellAccess[obj['key']] = obj['value']
-
+                        ShellAccess[obj['key']] = obj['value']
+ 
 
             except Exception as e:
                 print(line)
@@ -169,6 +179,9 @@ class Node(NodeBase):
         # create thread to read this process's output
         NodeStdReader(self.ps)
 
+        # watch Python variables for changes
+        self.vw = VarWatcher(get_ipython(), self.ps)
+
     def write(self, s):
         self.ps.stdin.write(s)
         self.ps.stdin.write("\r\n")
@@ -224,3 +237,6 @@ class Npm(NodeBase):
 
     def list(self):
         self.cmd('list', None)
+
+
+
