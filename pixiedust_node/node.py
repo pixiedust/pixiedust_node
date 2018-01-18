@@ -14,6 +14,12 @@ from pixiedust.utils.environment import Environment
 from pixiedust.utils.shellAccess import ShellAccess
 
 class VarWatcher(object):
+    """
+    this class watches for cell "post_execute" events. When one occurs, it examines
+    the IPython shell for variables that have been set (only numbers and strings).
+    New or changed variables are moved over to the JavaScript environment.
+    """
+
     def __init__(self, ip, ps):
         self.shell = ip
         self.ps = ps
