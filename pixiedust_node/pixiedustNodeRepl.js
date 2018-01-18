@@ -20,7 +20,7 @@ const startRepl = function(instream, outstream) {
         if (lastGlobal[v] !== h) {
           const datatype = isArray(r.context[v]) && typeof r.context[v][0] === 'object' ? 'array' : typeof r.context[v];
           const obj = { _pixiedust: true, type: 'variable', key: v, datatype: datatype, value: r.context[v] };
-          outstream.write(JSON.stringify(obj) + '\n')
+          outstream.write('\n' + JSON.stringify(obj) + '\n')
           lastGlobal[v] = h;
         }
       }
@@ -59,17 +59,18 @@ const startRepl = function(instream, outstream) {
   // custom print function for Notebook interface
   const print = function(data) {
     // bundle the data into an object
+    globalVariableChecker();
     const obj = { _pixiedust: true, type: 'print', data: data };
     outstream.write(JSON.stringify(obj) + '\n');
-    globalVariableChecker();
   };
 
   // custom display function for Notebook interface
   const display = function(data) {
     // bundle the data into an object
+    globalVariableChecker();
     const obj = { _pixiedust: true, type: 'display', data: data };
     outstream.write(JSON.stringify(obj) + '\n');
-    globalVariableChecker();
+
   };
 
   // custom display function for Notebook interface
