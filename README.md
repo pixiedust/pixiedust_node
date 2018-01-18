@@ -160,6 +160,7 @@ var array_of_objects = [{a:1,b:2}, {a:3, b:4}];
 Then these variables can be used in Python:
 
 ```
+# Python cell
 print str, n1, n2, tf
 print obj
 print array_of_strings
@@ -169,6 +170,28 @@ print array_of_objects
 Strings, numbers, booleans and arrays of such are converted to their equivalent in Python. Objects are converted into Python dictionaries and arrays of objects are automatically converted into a Pandas DataFrames.
 
 Note that only variables declared with `var` are moved to Python, not constants declared with `const`.
+
+Similarly, Python variables of type str, int, float, bool, unicode or dict will be moved to Node.js when a cell is executed:
+
+```
+# Python cell
+a = 'hello'
+b = 2
+b = 3
+c= False
+d = {}
+d["x"] = 1
+d["y"] = 2
+e = 3.142
+```
+
+The variables can then be used in Node.js:
+
+```
+%%node
+console.log(a,b,c,d,e);
+// hello 3 false { y: 2, x: 1 } 3.142
+```
 
 ## Managing the Node.js process
 
