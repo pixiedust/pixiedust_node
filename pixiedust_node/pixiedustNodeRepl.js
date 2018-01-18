@@ -14,12 +14,15 @@ const startRepl = function(instream, outstream) {
     if (varlist.length === 0) return;
     for(var i in varlist) {
       const v = varlist[i];
-      const h =  hash(JSON.stringify(r.context[v]));
-      if (lastGlobal[v] !== h) {
-        const datatype = isArray(r.context[v]) && typeof r.context[v][0] === 'object' ? 'array' : typeof r.context[v];
-        const obj = { _pixiedust: true, type: 'variable', key: v, datatype: datatype, value: r.context[v] };
-        outstream.write(JSON.stringify(obj) + '\n')
-        lastGlobal[v] = h;
+      const j = JSON.stringify(r.context[v]);
+      if (typeof j === 'string' ) {
+        const h = hash(j);
+        if (lastGlobal[v] !== h) {
+          const datatype = isArray(r.context[v]) && typeof r.context[v][0] === 'object' ? 'array' : typeof r.context[v];
+          const obj = { _pixiedust: true, type: 'variable', key: v, datatype: datatype, value: r.context[v] };
+          outstream.write(JSON.stringify(obj) + '\n')
+          lastGlobal[v] = h;
+        }
       }
     }
   };

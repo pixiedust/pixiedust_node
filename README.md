@@ -171,7 +171,7 @@ Strings, numbers, booleans and arrays of such are converted to their equivalent 
 
 Note that only variables declared with `var` are moved to Python, not constants declared with `const`.
 
-Similarly, Python variables of type str, int, float, bool, unicode or dict will be moved to Node.js when a cell is executed:
+Similarly, Python variables of type `str`, `int`, `float`, `bool`, `unicode`, `dict` or `list` will be moved to Node.js when a cell is executed:
 
 ```
 # Python cell

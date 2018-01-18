@@ -34,7 +34,7 @@ class VarWatcher(object):
             v = self.shell.user_ns[key]
             t = type(v)
             # if this is one of our varables, is a number or a string or a float
-            if not key.startswith('_') and (t in (str, int, float, bool, unicode, dict)):
+            if not key.startswith('_') and (t in (str, int, float, bool, unicode, dict, list)):
                 # if it's not in our cache or it is an its value has changed
                 if not key in self.cache or (key in self.cache and self.cache[key] != v):
                     # move it to JavaScript land and add it to our cache
