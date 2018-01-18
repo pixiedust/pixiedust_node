@@ -18,13 +18,19 @@ class VarWatcher(object):
         self.shell = ip
         self.ps = ps
         ip.events.register('post_execute', self.post_execute)
+        self.cache = {}
 
     def post_execute(self):
         for key in self.shell.user_ns:
-            t = type(self.shell.user_ns[key])
-            if not key.startswith('_') and (t == str or t == int):
-                #print("Setting JS variable: " + key + " from Python")
-                self.ps.stdin.write("var " + key + " = " + json.dumps(self.shell.user_ns[key]) + ";\r\n")
+            v = self.shell.user_ns[key]
+            t = type(v)
+            # if this is one of our varables, is a number or a string or a float
+            if not key.startswith('_') and (t == str or t == int or t == unicode or t == float):
+                # if it's not in our cache or it is an its value has changed
+                if not key in self.cache or (key in self.cache and self.cache[key] != v):
+                    # move it to JavaScript land and add it to our cache
+                    self.ps.stdin.write("var " + key + " = " + json.dumps(v) + ";\r\n")
+                    self.cache[key] = v
 
 class NodeStdReader(Thread):
     """
