@@ -171,6 +171,18 @@ Strings, numbers, booleans and arrays of such are converted to their equivalent 
 
 Note that only variables declared with `var` are moved to Python, not constants declared with `const`.
 
+
+If you want to move data from an asynchronous Node.js callback, remember to write it to a *global variable*:
+
+```js
+%%node
+var googlehomepage = '';
+request.get('http://www.google.com').then(function(data) {
+  googlehomepage = data;
+  print('Fetched Google homepage');
+});
+```
+
 Similarly, Python variables of type `str`, `int`, `float`, `bool`, `unicode`, `dict` or `list` will be moved to Node.js when a cell is executed:
 
 ```
