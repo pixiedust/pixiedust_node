@@ -102,6 +102,8 @@ cities.query({name: 'York'}).then(display);
 
 ### store
 
+** This function is deprecated as Node.js global variables are copied to the Python environment automatically **
+
 ```js
 %%node
 
@@ -125,7 +127,7 @@ var str = 'Sales are up <b>25%</b>';
 html(str);
 ```
 
-### js
+### image
 
 ```js
 %%node
@@ -138,6 +140,69 @@ image(url);
 ```js
 %%node
 help();
+```
+
+## Node.js-Python bridge
+
+Any *global* variables that you create in your `%%node` cells will be automatically copied to equivalent variables in Python. e.g if you create some variables in a Node.js cell:
+
+```
+%%node
+var str = "hello world";
+var n1 = 4.1515;
+var n2 = 42;
+var tf = true;
+var obj = { name:"Frank", age: 42 };
+var array_of_strings = ["hello", "world"];
+var array_of_objects = [{a:1,b:2}, {a:3, b:4}];
+```
+
+Then these variables can be used in Python:
+
+```
+# Python cell
+print str, n1, n2, tf
+print obj
+print array_of_strings
+print array_of_objects
+```
+
+Strings, numbers, booleans and arrays of such are converted to their equivalent in Python. Objects are converted into Python dictionaries and arrays of objects are automatically converted into a Pandas DataFrames.
+
+Note that only variables declared with `var` are moved to Python, not constants declared with `const`.
+
+
+If you want to move data from an asynchronous Node.js callback, remember to write it to a *global variable*:
+
+```js
+%%node
+var googlehomepage = '';
+request.get('http://www.google.com').then(function(data) {
+  googlehomepage = data;
+  print('Fetched Google homepage');
+});
+```
+
+Similarly, Python variables of type `str`, `int`, `float`, `bool`, `unicode`, `dict` or `list` will be moved to Node.js when a cell is executed:
+
+```
+# Python cell
+a = 'hello'
+b = 2
+b = 3
+c= False
+d = {}
+d["x"] = 1
+d["y"] = 2
+e = 3.142
+```
+
+The variables can then be used in Node.js:
+
+```
+%%node
+console.log(a,b,c,d,e);
+// hello 3 false { y: 2, x: 1 } 3.142
 ```
 
 ## Managing the Node.js process

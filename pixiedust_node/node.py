@@ -13,6 +13,33 @@ from pixiedust.display import display
 from pixiedust.utils.environment import Environment
 from pixiedust.utils.shellAccess import ShellAccess
 
+class VarWatcher(object):
+    """
+    this class watches for cell "post_execute" events. When one occurs, it examines
+    the IPython shell for variables that have been set (only numbers and strings).
+    New or changed variables are moved over to the JavaScript environment.
+    """
+
+    def __init__(self, ip, ps):
+        self.shell = ip
+        self.ps = ps
+        ip.events.register('post_execute', self.post_execute)
+        self.clearCache()
+
+    def clearCache(self):
+        self.cache = {}
+
+    def post_execute(self):
+        for key in self.shell.user_ns:
+            v = self.shell.user_ns[key]
+            t = type(v)
+            # if this is one of our varables, is a number or a string or a float
+            if not key.startswith('_') and (t in (str, int, float, bool, unicode, dict, list)):
+                # if it's not in our cache or it is an its value has changed
+                if not key in self.cache or (key in self.cache and self.cache[key] != v):
+                    # move it to JavaScript land and add it to our cache
+                    self.ps.stdin.write("var " + key + " = " + json.dumps(v) + ";\r\n")
+                    self.cache[key] = v
 
 class NodeStdReader(Thread):
     """
@@ -34,6 +61,7 @@ class NodeStdReader(Thread):
         self._stop_event.set()
 
     def run(self):
+
         # forever
         while not self._stop_event.is_set():
             # read line from Node's stdout
@@ -60,6 +88,7 @@ class NodeStdReader(Thread):
                     elif obj['type'] == 'print':
                         print(json.dumps(obj['data']))
                     elif obj['type'] == 'store':
+                        print '!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!'
                         variable = 'pdf'
                         if 'variable' in obj:
                             variable = obj['variable']
@@ -68,6 +97,9 @@ class NodeStdReader(Thread):
                         IPython.display.display(IPython.display.HTML(obj['data']))
                     elif obj['type'] == 'image':
                         IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
+                    elif obj['type'] == 'variable':
+                        ShellAccess[obj['key']] = obj['value']
+ 
 
             except Exception as e:
                 print(line)
@@ -162,6 +194,9 @@ class Node(NodeBase):
         # create thread to read this process's output
         NodeStdReader(self.ps)
 
+        # watch Python variables for changes
+        self.vw = VarWatcher(get_ipython(), self.ps)
+
     def write(self, s):
         self.ps.stdin.write(s)
         self.ps.stdin.write("\r\n")
@@ -172,6 +207,7 @@ class Node(NodeBase):
 
     def clear(self):
         self.write("\r\n.clear")
+        self.vw.clearCache()
 
     def help(self):
         self.cancel()
@@ -217,3 +253,6 @@ class Npm(NodeBase):
 
     def list(self):
         self.cmd('list', None)
+
+
+
