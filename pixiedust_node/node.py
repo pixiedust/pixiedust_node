@@ -13,6 +13,12 @@ from pixiedust.display import display
 from pixiedust.utils.environment import Environment
 from pixiedust.utils.shellAccess import ShellAccess
 
+try:
+    VARIABLE_TYPES = (str, int, float, bool, unicode, dict, list)
+except:
+    # Python 3 => no unicode type
+    VARIABLE_TYPES = (str, int, float, bool, dict, list)
+
 class VarWatcher(object):
     """
     this class watches for cell "post_execute" events. When one occurs, it examines
@@ -34,7 +40,7 @@ class VarWatcher(object):
             v = self.shell.user_ns[key]
             t = type(v)
             # if this is one of our varables, is a number or a string or a float
-            if not key.startswith('_') and (t in (str, int, float, bool, unicode, dict, list)):
+            if not key.startswith('_') and (t in VARIABLE_TYPES):
                 # if it's not in our cache or it is an its value has changed
                 if not key in self.cache or (key in self.cache and self.cache[key] != v):
                     # move it to JavaScript land and add it to our cache
@@ -88,7 +94,7 @@ class NodeStdReader(Thread):
                     elif obj['type'] == 'print':
                         print(json.dumps(obj['data']))
                     elif obj['type'] == 'store':
-                        print '!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!'
+                        print('!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!')
                         variable = 'pdf'
                         if 'variable' in obj:
                             variable = obj['variable']
@@ -150,7 +156,7 @@ class NodeBase(object):
         self.npm_prog = 'npm'
         if platform.system() == 'Windows':
             self.node_prog += '.exe'
-            self.npm_prog += '.exe'
+            self.npm_prog += '.cmd'
 
         self.node_path = NodeBase.which(self.node_prog)
         if self.node_path is None:
@@ -158,7 +164,7 @@ class NodeBase(object):
             raise FileNotFoundError('node executable not found in path')
 
         self.npm_path = NodeBase.which(self.npm_prog)
-        if self.node_path is None:
+        if self.npm_path is None:
             print('ERROR: Cannot find npm executable')
             raise FileNotFoundError('npm executable not found in path')
 
