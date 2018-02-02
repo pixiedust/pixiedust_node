@@ -29,6 +29,7 @@ const startRepl = function(instream, outstream) {
 
   // sync Node.js to Python every 1 second
   interval = setInterval(globalVariableChecker, 1000);
+  interval.unref();
 
   // custom writer function that outputs nothing
   const writer = function(output) {
