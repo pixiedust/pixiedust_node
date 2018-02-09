@@ -16,6 +16,7 @@
 
 from IPython.core.magic import (Magics, magics_class, cell_magic)
 from IPython.display import display, HTML
+from IPython.core.error import TryNext
 import warnings
 from .node import Node, Npm
 import os
@@ -25,7 +26,7 @@ from pixiedust.utils.shellAccess import ShellAccess
 @magics_class
 class PixiedustNodeMagics(Magics):
 
-    def __init__(self, shell):
+    def __init__(self, shell, node):
         super(PixiedustNodeMagics,self).__init__(shell=shell) 
         display(HTML(
 """
@@ -37,9 +38,7 @@ class PixiedustNodeMagics(Magics):
             </div> 
 """
         ))
-        # create Node.js sub-process
-        path = os.path.join(__path__[0], 'pixiedustNodeRepl.js')
-        self.n = Node(path)
+        self.n = node
         ShellAccess.npm = Npm()
         ShellAccess.node = self.n
 
@@ -48,11 +47,27 @@ class PixiedustNodeMagics(Magics):
         # write the cell contents to the Node.js process
         self.n.write(cell)
 
+# call once when the Kernel shuts down
+def shutdown_hook(ipython):
+    node.terminate()
+    raise TryNext
 
 try:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        get_ipython().register_magics(PixiedustNodeMagics)
+        ip = get_ipython()
+
+        # start up a Node.js sub-process running a REPL
+        path = os.path.join(__path__[0], 'pixiedustNodeRepl.js')
+        node = Node(path)
+
+        # pass the node process to the Node magics
+        magics = PixiedustNodeMagics(ip, node)
+        ip.register_magics(magics)
+
+        # register for shutdown hook
+        ip.set_hook('shutdown_hook', shutdown_hook)
+
 except NameError:
     # IPython not available we must be in a spark executor\
     pass

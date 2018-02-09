@@ -197,13 +197,16 @@ class Node(NodeBase):
         # process that runs the Node.js code
         args = (self.node_path, path)
         self.ps = self.popen(args)
-        # print ("Node process id", self.ps.pid)
+        print ("Node process id", self.ps.pid)
 
         # create thread to read this process's output
         NodeStdReader(self.ps)
 
         # watch Python variables for changes
         self.vw = VarWatcher(get_ipython(), self.ps)
+
+    def terminate(self):
+        self.ps.terminate()
 
     def write(self, s):
         self.ps.stdin.write(s)
