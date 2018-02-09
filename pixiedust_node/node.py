@@ -13,6 +13,8 @@ from pixiedust.display import display
 from pixiedust.utils.environment import Environment
 from pixiedust.utils.shellAccess import ShellAccess
 
+RESERVED = ['true', 'false','self','this','In','Out']
+
 try:
     VARIABLE_TYPES = (str, int, float, bool, unicode, dict, list)
 except:
@@ -40,7 +42,7 @@ class VarWatcher(object):
             v = self.shell.user_ns[key]
             t = type(v)
             # if this is one of our varables, is a number or a string or a float
-            if not key.startswith('_') and (t in VARIABLE_TYPES):
+            if not key.startswith('_') and (not key in RESERVED) and (t in VARIABLE_TYPES):
                 # if it's not in our cache or it is an its value has changed
                 if not key in self.cache or (key in self.cache and self.cache[key] != v):
                     # move it to JavaScript land and add it to our cache
