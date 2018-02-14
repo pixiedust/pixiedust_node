@@ -93,40 +93,36 @@ class NodeStdReader(Thread):
             try:
                 if line:
                     obj = json.loads(line)
+                    # if it does and is a pixiedust object
+                    if obj and isinstance(obj, dict) and obj['_pixiedust']:
+                        if obj['type'] == 'display':
+                            pdf = pandas.DataFrame(obj['data'])
+                            ShellAccess.pdf = pdf
+                            display(pdf)
+                        elif obj['type'] == 'print':
+                            print(json.dumps(obj['data']))
+                        elif obj['type'] == 'store':
+                            print('!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!')
+                            variable = 'pdf'
+                            if 'variable' in obj:
+                                variable = obj['variable']
+                            ShellAccess[variable] = pandas.DataFrame(obj['data'])
+                        elif obj['type'] == 'html':
+                            IPython.display.display(IPython.display.HTML(obj['data']))
+                        elif obj['type'] == 'image':
+                            IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
+                        elif obj['type'] == 'variable':
+                            ShellAccess[obj['key']] = obj['value']
+                            if self.vw:
+                                self.vw.setCache(obj['key'], obj['value'])
+                    else:
+                        print(line)
             except Exception as e:
                 # output the original line when we don't have JSON
                 line = line.strip()
                 if len(line) > 0:
                     print(line)
 
-            try:
-                # if it does and is a pixiedust object
-                if obj and isinstance(obj, dict) and obj['_pixiedust']:
-                    if obj['type'] == 'display':
-                        pdf = pandas.DataFrame(obj['data'])
-                        ShellAccess.pdf = pdf
-                        display(pdf)
-                    elif obj['type'] == 'print':
-                        print(json.dumps(obj['data']))
-                    elif obj['type'] == 'store':
-                        print('!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!')
-                        variable = 'pdf'
-                        if 'variable' in obj:
-                            variable = obj['variable']
-                        ShellAccess[variable] = pandas.DataFrame(obj['data'])
-                    elif obj['type'] == 'html':
-                        IPython.display.display(IPython.display.HTML(obj['data']))
-                    elif obj['type'] == 'image':
-                        IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
-                    elif obj['type'] == 'variable':
-                        ShellAccess[obj['key']] = obj['value']
-                        if self.vw:
-                            self.vw.setCache(obj['key'], obj['value'])
- 
-
-            except Exception as e:
-                print(line)
-                print(e)
 
 
 class NodeBase(object):
@@ -212,7 +208,7 @@ class Node(NodeBase):
         # process that runs the Node.js code
         args = (self.node_path, path)
         self.ps = self.popen(args)
-        print ("Node process id", self.ps.pid)
+        #print ("Node process id", self.ps.pid)
 
         # watch Python variables for changes
         self.vw = VarWatcher(get_ipython(), self.ps)
