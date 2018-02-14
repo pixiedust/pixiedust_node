@@ -88,7 +88,7 @@ class NodeStdReader(Thread):
 
             try:
                 # if it does and is a pixiedust object
-                if obj and obj['_pixiedust']:
+                if obj and isinstance(obj, dict) and obj['_pixiedust']:
                     if obj['type'] == 'display':
                         pdf = pandas.DataFrame(obj['data'])
                         ShellAccess.pdf = pdf
