@@ -4,6 +4,7 @@ import os
 import sys
 import platform
 import subprocess
+import hashlib
 from functools import partial
 from threading import Thread, Event
 
@@ -37,6 +38,17 @@ class VarWatcher(object):
     def clearCache(self):
         self.cache = {}
 
+    # the cache contains the key (variable name) against an MD5 of the
+    # JSON form of the value. This makes the cache more compact.
+    def setCache(self, key, val):
+        self.cache[key] = hashlib.md5(json.dumps(val)).hexdigest()
+
+    # check whether key is in cache and whether it equals val by comparing
+    # the hash of its JSON value with what's in the cache
+    def inCache(self, key, val):
+        hash = hashlib.md5(json.dumps(val)).hexdigest()
+        return (key in self.cache and self.cache[key] == hash)
+
     def post_execute(self):
         for key in self.shell.user_ns:
             v = self.shell.user_ns[key]
@@ -44,10 +56,10 @@ class VarWatcher(object):
             # if this is one of our varables, is a number or a string or a float
             if not key.startswith('_') and (not key in RESERVED) and (t in VARIABLE_TYPES):
                 # if it's not in our cache or it is an its value has changed
-                if not key in self.cache or (key in self.cache and self.cache[key] != v):
+                if not key in self.cache or not self.inCache(key, v):
                     # move it to JavaScript land and add it to our cache
                     self.ps.stdin.write("var " + key + " = " + json.dumps(v) + ";\r\n")
-                    self.cache[key] = v
+                    self.setCache(key, v)
 
 class NodeStdReader(Thread):
     """
@@ -58,10 +70,11 @@ class NodeStdReader(Thread):
     then the pixiedust display/print function is called
     """
 
-    def __init__(self, ps):
+    def __init__(self, ps, vw):
         super(NodeStdReader, self).__init__()
         self._stop_event = Event()
         self.ps = ps
+        self.vw = vw
         self.daemon = True
         self.start()
 
@@ -80,38 +93,36 @@ class NodeStdReader(Thread):
             try:
                 if line:
                     obj = json.loads(line)
+                    # if it does and is a pixiedust object
+                    if obj and isinstance(obj, dict) and obj['_pixiedust']:
+                        if obj['type'] == 'display':
+                            pdf = pandas.DataFrame(obj['data'])
+                            ShellAccess.pdf = pdf
+                            display(pdf)
+                        elif obj['type'] == 'print':
+                            print(json.dumps(obj['data']))
+                        elif obj['type'] == 'store':
+                            print('!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!')
+                            variable = 'pdf'
+                            if 'variable' in obj:
+                                variable = obj['variable']
+                            ShellAccess[variable] = pandas.DataFrame(obj['data'])
+                        elif obj['type'] == 'html':
+                            IPython.display.display(IPython.display.HTML(obj['data']))
+                        elif obj['type'] == 'image':
+                            IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
+                        elif obj['type'] == 'variable':
+                            ShellAccess[obj['key']] = obj['value']
+                            if self.vw:
+                                self.vw.setCache(obj['key'], obj['value'])
+                    else:
+                        print(line)
             except Exception as e:
                 # output the original line when we don't have JSON
                 line = line.strip()
                 if len(line) > 0:
                     print(line)
 
-            try:
-                # if it does and is a pixiedust object
-                if obj and isinstance(obj, dict) and obj['_pixiedust']:
-                    if obj['type'] == 'display':
-                        pdf = pandas.DataFrame(obj['data'])
-                        ShellAccess.pdf = pdf
-                        display(pdf)
-                    elif obj['type'] == 'print':
-                        print(json.dumps(obj['data']))
-                    elif obj['type'] == 'store':
-                        print('!!! Warning: store is now deprecated - Node.js global variables are automatically propagated to Python !!!')
-                        variable = 'pdf'
-                        if 'variable' in obj:
-                            variable = obj['variable']
-                        ShellAccess[variable] = pandas.DataFrame(obj['data'])
-                    elif obj['type'] == 'html':
-                        IPython.display.display(IPython.display.HTML(obj['data']))
-                    elif obj['type'] == 'image':
-                        IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
-                    elif obj['type'] == 'variable':
-                        ShellAccess[obj['key']] = obj['value']
- 
-
-            except Exception as e:
-                print(line)
-                print(e)
 
 
 class NodeBase(object):
@@ -197,13 +208,13 @@ class Node(NodeBase):
         # process that runs the Node.js code
         args = (self.node_path, path)
         self.ps = self.popen(args)
-        print ("Node process id", self.ps.pid)
-
-        # create thread to read this process's output
-        NodeStdReader(self.ps)
+        #print ("Node process id", self.ps.pid)
 
         # watch Python variables for changes
         self.vw = VarWatcher(get_ipython(), self.ps)
+        
+        # create thread to read this process's output
+        NodeStdReader(self.ps, self.vw)
 
     def terminate(self):
         self.ps.terminate()
@@ -245,7 +256,7 @@ class Npm(NodeBase):
         ps = self.popen(args)
 
         # create thread to read this process's output
-        t = NodeStdReader(ps)
+        t = NodeStdReader(ps, None)
 
         # wait for the sub-process to exit
         ps.wait()
