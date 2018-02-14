@@ -4,6 +4,7 @@ import os
 import sys
 import platform
 import subprocess
+import hashlib
 from functools import partial
 from threading import Thread, Event
 
@@ -37,6 +38,17 @@ class VarWatcher(object):
     def clearCache(self):
         self.cache = {}
 
+    # the cache contains the key (variable name) against an MD5 of the
+    # JSON form of the value. This makes the cache more compact.
+    def setCache(self, key, val):
+        self.cache[key] = hashlib.md5(json.dumps(val)).hexdigest()
+
+    # check whether key is in cache and whether it equals val by comparing
+    # the hash of its JSON value with what's in the cache
+    def inCache(self, key, val):
+        hash = hashlib.md5(json.dumps(val)).hexdigest()
+        return (key in self.cache and self.cache[key] == hash)
+
     def post_execute(self):
         for key in self.shell.user_ns:
             v = self.shell.user_ns[key]
@@ -44,10 +56,10 @@ class VarWatcher(object):
             # if this is one of our varables, is a number or a string or a float
             if not key.startswith('_') and (not key in RESERVED) and (t in VARIABLE_TYPES):
                 # if it's not in our cache or it is an its value has changed
-                if not key in self.cache or (key in self.cache and self.cache[key] != v):
+                if not key in self.cache or not self.inCache(key, v):
                     # move it to JavaScript land and add it to our cache
                     self.ps.stdin.write("var " + key + " = " + json.dumps(v) + ";\r\n")
-                    self.cache[key] = v
+                    self.setCache(key, v)
 
 class NodeStdReader(Thread):
     """
@@ -58,10 +70,11 @@ class NodeStdReader(Thread):
     then the pixiedust display/print function is called
     """
 
-    def __init__(self, ps):
+    def __init__(self, ps, vw):
         super(NodeStdReader, self).__init__()
         self._stop_event = Event()
         self.ps = ps
+        self.vw = vw
         self.daemon = True
         self.start()
 
@@ -107,6 +120,8 @@ class NodeStdReader(Thread):
                         IPython.display.display(IPython.display.HTML('<img src="{0}" />'.format(obj['data'])))
                     elif obj['type'] == 'variable':
                         ShellAccess[obj['key']] = obj['value']
+                        if self.vw:
+                            self.vw.setCache(obj['key'], obj['value'])
  
 
             except Exception as e:
@@ -199,11 +214,11 @@ class Node(NodeBase):
         self.ps = self.popen(args)
         print ("Node process id", self.ps.pid)
 
-        # create thread to read this process's output
-        NodeStdReader(self.ps)
-
         # watch Python variables for changes
         self.vw = VarWatcher(get_ipython(), self.ps)
+        
+        # create thread to read this process's output
+        NodeStdReader(self.ps, self.vw)
 
     def terminate(self):
         self.ps.terminate()
@@ -245,7 +260,7 @@ class Npm(NodeBase):
         ps = self.popen(args)
 
         # create thread to read this process's output
-        t = NodeStdReader(ps)
+        t = NodeStdReader(ps, None)
 
         # wait for the sub-process to exit
         ps.wait()
