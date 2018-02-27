@@ -41,12 +41,12 @@ class VarWatcher(object):
     # the cache contains the key (variable name) against an MD5 of the
     # JSON form of the value. This makes the cache more compact.
     def setCache(self, key, val):
-        self.cache[key] = hashlib.md5(json.dumps(val)).hexdigest()
+        self.cache[key] = hashlib.md5(json.dumps(val).encode("utf8")).hexdigest()
 
     # check whether key is in cache and whether it equals val by comparing
     # the hash of its JSON value with what's in the cache
     def inCache(self, key, val):
-        hash = hashlib.md5(json.dumps(val)).hexdigest()
+        hash = hashlib.md5(json.dumps(val).encode("utf8")).hexdigest()
         return (key in self.cache and self.cache[key] == hash)
 
     def post_execute(self):
@@ -212,7 +212,7 @@ class Node(NodeBase):
 
         # watch Python variables for changes
         self.vw = VarWatcher(get_ipython(), self.ps)
-        
+
         # create thread to read this process's output
         NodeStdReader(self.ps, self.vw)
 
@@ -275,6 +275,3 @@ class Npm(NodeBase):
 
     def list(self):
         self.cmd('list', None)
-
-
-
